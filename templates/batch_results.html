@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Processing Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-12">
+        <!-- Results Header -->
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-chart-bar"></i> Batch Processing Results</h3>
+                <p class="mb-0">Processed {{ results|length }} boxes using the original process_boxes.py logic</p>
+            </div>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ results|length }}</h5>
+                        <p class="card-text">Boxes Processed</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ "%.2f"|format(processing_times|sum) }}s</h5>
+                        <p class="card-text">Total Time</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ "%.3f"|format(processing_times|sum / processing_times|length) }}s</h5>
+                        <p class="card-text">Avg Processing</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ "%.2f"|format(results|sum(attribute='surface_area')/results|length) }}</h5>
+                        <p class="card-text">Avg Surface Area</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-table"></i> Processing Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Box ID</th>
+                                <th>Image</th>
+                                <th>Dimensions (H×L×W)</th>
+                                <th>Surface Area</th>
+                                <th>Capacity</th>
+                                <th>Processing Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in results %}
+                            <tr>
+                                <td><strong>{{ result.image_id }}</strong></td>
+                                <td>
+                                    {% if result.image_base64 %}
+                                        <img src="{{ result.image_base64 }}" alt="Box {{ result.image_id }}" 
+                                             style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                        <span class="text-muted">No image</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ "%.1f"|format(result.height) }} × 
+                                    {{ "%.1f"|format(result.weight) }} × 
+                                    {{ "%.1f"|format(result.breadth) }}
+                                </td>
+                                <td>{{ "%.2f"|format(result.surface_area) }} sq units</td>
+                                <td>{{ "%.2f"|format(result.capacity) }} cubic units</td>
+                                <td>{{ "%.3f"|format(result.processing_time) }}s</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-images"></i> Detailed Box Results</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for result in results %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6>Box {{ result.image_id }}</h6>
+                            </div>
+                            <div class="card-body">
+                                {% if result.image_base64 %}
+                                    <img src="{{ result.image_base64 }}" alt="Box {{ result.image_id }}" 
+                                         class="img-fluid rounded mb-3" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                {% endif %}
+                                
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Dimensions:</strong></td>
+                                        <td>{{ "%.1f"|format(result.height) }}×{{ "%.1f"|format(result.weight) }}×{{ "%.1f"|format(result.breadth) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Surface Area:</strong></td>
+                                        <td>{{ "%.2f"|format(result.surface_area) }} sq units</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Capacity:</strong></td>
+                                        <td>{{ "%.2f"|format(result.capacity) }} cubic units</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Process Time:</strong></td>
+                                        <td>{{ "%.3f"|format(result.processing_time) }}s</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Processing Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-success">
+                    <strong><i class="fas fa-check-circle"></i> Processing Method:</strong><br>
+                    This batch was processed using the exact same <code>process_images()</code> function from 
+                    <code>process_boxes.py</code> that the original script uses. All calculations, timing delays, 
+                    and image processing are identical to running the original script.
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Statistics:</h6>
+                        <ul class="small">
+                            <li>Total Processing Time: {{ "%.2f"|format(processing_times|sum) }} seconds</li>
+                            <li>Average Time per Box: {{ "%.3f"|format(processing_times|sum / processing_times|length) }} seconds</li>
+                            <li>Fastest Box: {{ "%.3f"|format(processing_times|min) }} seconds</li>
+                            <li>Slowest Box: {{ "%.3f"|format(processing_times|max) }} seconds</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Processing Features:</h6>
+                        <ul class="small">
+                            <li>Random processing delays (0.1-2.0s per box)</li>
+                            <li>Image download and base64 conversion</li>
+                            <li>Surface area and capacity calculations</li>
+                            <li>All utility functions from utils/ modules</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <a href="{{ url_for('batch_processing') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Process Another Batch
+                </a>
+                
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-cube"></i> Single Box Processing
+                </a>
+                
+                <button class="btn btn-success" onclick="downloadBatchResults()">
+                    <i class="fas fa-download"></i> Download Summary
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadBatchResults() {
+    const data = {
+        summary: {
+            total_boxes: {{ results|length }},
+            total_time: {{ processing_times|sum }},
+            average_time: {{ processing_times|sum / processing_times|length }},
+            generated_at: new Date().toISOString(),
+            processed_with: "process_boxes.py process_images() function"
+        },
+        results: [
+            {% for result in results %}
+            {
+                image_id: "{{ result.image_id }}",
+                dimensions: {
+                    height: {{ result.height }},
+                    length: {{ result.weight }},
+                    width: {{ result.breadth }}
+                },
+                surface_area: {{ result.surface_area }},
+                capacity: {{ result.capacity }},
+                processing_time: {{ result.processing_time }},
+                image_url: "{{ result.image_url }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'batch_processing_results.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

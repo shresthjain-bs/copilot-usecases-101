@@ -1,0 +1,4 @@
+image_id,image_url,height,weight,breadth
+1,https://raw.githubusercontent.com/shresthjain-bs/public/main/copilot_demo/box1.jpeg,600,400,300
+2,https://raw.githubusercontent.com/shresthjain-bs/public/main/copilot_demo/box2.png,800,600,400
+3,https://raw.githubusercontent.com/shresthjain-bs/public/main/copilot_demo/box3.jpeg,1024,768,512

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Box Processing Results{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <!-- Results Header -->
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h3><i class="fas fa-chart-bar"></i> Box Processing Results</h3>
+                <p class="mb-0">Processed using the original process_boxes.py logic</p>
+            </div>
+        </div>
+
+        <!-- Main Results Card -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Image Column -->
+                    <div class="col-md-4 text-center">
+                        <h5><i class="fas fa-image"></i> Box Image</h5>
+                        {% if result.image_base64 %}
+                            <img src="{{ result.image_base64 }}" alt="Box Image" class="img-fluid rounded shadow" style="max-height: 250px;">
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i> Image could not be loaded
+                            </div>
+                        {% endif %}
+                        
+                        <p class="mt-2 small text-muted">
+                            <strong>Box ID:</strong> {{ result.image_id }}<br>
+                            <strong>Processing Time:</strong> {{ "%.3f"|format(result.processing_time) }}s
+                        </p>
+                    </div>
+
+                    <!-- Dimensions and Results Column -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <!-- Dimensions -->
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-ruler-combined"></i> Dimensions</h5>
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Height:</strong></td>
+                                        <td>{{ "%.2f"|format(result.height) }} units</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Length (Weight):</strong></td>
+                                        <td>{{ "%.2f"|format(result.weight) }} units</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Width (Breadth):</strong></td>
+                                        <td>{{ "%.2f"|format(result.breadth) }} units</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Calculated Results -->
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-calculator"></i> Calculated Results</h5>
+                                <div class="alert alert-success">
+                                    <strong><i class="fas fa-expand"></i> Surface Area:</strong><br>
+                                    <span class="h4">{{ "%.2f"|format(result.surface_area) }}</span> sq units
+                                </div>
+                                <div class="alert alert-info">
+                                    <strong><i class="fas fa-cube"></i> Capacity (Volume):</strong><br>
+                                    <span class="h4">{{ "%.2f"|format(result.capacity) }}</span> cubic units
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Calculations -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Calculation Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Surface Area Formula:</h6>
+                        <p class="font-monospace">2 × (l×w + l×h + w×h)</p>
+                        <p class="small">
+                            = 2 × ({{ "%.2f"|format(result.weight) }}×{{ "%.2f"|format(result.breadth) }} + 
+                            {{ "%.2f"|format(result.weight) }}×{{ "%.2f"|format(result.height) }} + 
+                            {{ "%.2f"|format(result.breadth) }}×{{ "%.2f"|format(result.height) }})<br>
+                            = 2 × ({{ "%.2f"|format(result.weight * result.breadth) }} + 
+                            {{ "%.2f"|format(result.weight * result.height) }} + 
+                            {{ "%.2f"|format(result.breadth * result.height) }})<br>
+                            = 2 × {{ "%.2f"|format(result.weight * result.breadth + result.weight * result.height + result.breadth * result.height) }}<br>
+                            = <strong>{{ "%.2f"|format(result.surface_area) }} sq units</strong>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Volume (Capacity) Formula:</h6>
+                        <p class="font-monospace">l × w × h</p>
+                        <p class="small">
+                            = {{ "%.2f"|format(result.weight) }} × {{ "%.2f"|format(result.breadth) }} × {{ "%.2f"|format(result.height) }}<br>
+                            = <strong>{{ "%.2f"|format(result.capacity) }} cubic units</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Processing Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <strong><i class="fas fa-check-circle"></i> Processing Method:</strong><br>
+                    This result was calculated using the exact same functions from <code>process_boxes.py</code> that are used in the original script. 
+                    The web interface creates a temporary CSV and calls <code>process_images()</code> to ensure identical behavior.
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Functions Used:</strong><br>
+                            • process_images() from process_boxes.py<br>
+                            • download_image_as_base64() from process_boxes.py<br>
+                            • All utility functions from utils/ modules
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <strong>Processing Details:</strong><br>
+                            • Image URL: {{ result.image_url }}<br>
+                            • Processing Time: {{ "%.3f"|format(result.processing_time) }} seconds<br>
+                            • Random Delay: Included (0.1-2.0s)
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card">
+            <div class="card-body text-center">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Process Another Box
+                </a>
+                
+                <a href="{{ url_for('batch_processing') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-upload"></i> Batch Processing
+                </a>
+                
+                <button class="btn btn-success" onclick="downloadResults()">
+                    <i class="fas fa-download"></i> Download Results
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Modal -->
+<div class="modal fade" id="downloadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Download Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Choose the format for downloading your results:</p>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-success" onclick="downloadAsJSON()">
+                        <i class="fas fa-file-code"></i> Download as JSON
+                    </button>
+                    <button class="btn btn-outline-info" onclick="downloadAsText()">
+                        <i class="fas fa-file-alt"></i> Download as Text Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadResults() {
+    const modal = new bootstrap.Modal(document.getElementById('downloadModal'));
+    modal.show();
+}
+
+function downloadAsJSON() {
+    const data = {
+        image_id: "{{ result.image_id }}",
+        dimensions: {
+            height: {{ result.height }},
+            length: {{ result.weight }},
+            width: {{ result.breadth }}
+        },
+        results: {
+            surface_area: {{ result.surface_area }},
+            capacity: {{ result.capacity }},
+            processing_time: {{ result.processing_time }}
+        },
+        image_url: "{{ result.image_url }}",
+        processed_with: "process_boxes.py functions",
+        calculated_at: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'box_processing_results.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    bootstrap.Modal.getInstance(document.getElementById('downloadModal')).hide();
+}
+
+function downloadAsText() {
+    const text = `Box Processing Results (Processed via process_boxes.py)
+========================================================
+
+Dimensions:
+- Height: {{ "%.2f"|format(result.height) }} units
+- Length: {{ "%.2f"|format(result.weight) }} units  
+- Width: {{ "%.2f"|format(result.breadth) }} units
+
+Calculated Results:
+- Surface Area: {{ "%.2f"|format(result.surface_area) }} square units
+- Capacity: {{ "%.2f"|format(result.capacity) }} cubic units
+
+Processing Information:
+- Processing Time: {{ "%.3f"|format(result.processing_time) }} seconds
+- Image Source: {{ result.image_url }}
+- Box ID: {{ result.image_id }}
+- Generated: ${new Date().toLocaleString()}
+- Method: Used original process_boxes.py functions
+
+Formulas Used:
+- Surface Area = 2 × (l×w + l×h + w×h)
+- Capacity = l × w × h
+
+Note: This result was generated using the exact same processing logic 
+as the original process_boxes.py script to ensure consistency.
+`;
+    
+    const blob = new Blob([text], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'box_processing_results.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    bootstrap.Modal.getInstance(document.getElementById('downloadModal')).hide();
+}
+</script>
+{% endblock %}
