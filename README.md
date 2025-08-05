@@ -97,6 +97,7 @@ Generated files:
 ```
 
 ### Web User Interface (UI)
+<img width="714" height="684" alt="Screenshot 2025-08-05 at 1 13 17 PM" src="https://github.com/user-attachments/assets/3db1d1f5-d437-4bf0-b4e4-9fd12a3b2055" />
 
 #### Starting the Web Application
 
